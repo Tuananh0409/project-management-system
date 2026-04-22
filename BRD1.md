@@ -144,3 +144,64 @@ Hiện này công ty đang mở rộng quy mô và cần một công cụ để 
 | **UX Designer** | Thiết kế trải nghiệm | Usability, adoption |
 
 ---
+
+## 6. Yêu cầu nghiệp vụ
+### 6.1. Quản lý dự án và công việc
+
+| ID | Tên yêu cầu | Mô tả | Ưu tiên | Tiêu chí chấp nhận |
+|----|-------------|-------|---------|--------------------|
+| **BR-01** | Cấu trúc phân cấp | Hệ thống phải hỗ trợ cấu trúc: Workspace → Project → Milestone → Task → Sub-task → Comment. | Must | - Tạo được từng cấp- Điều hướng giữa các cấp- URL riêng cho từng entity |
+| **BR-02** | Quản lý Workspace | Tạo, sửa, xóa workspace và quản lý thành viên. | Must | - CRUD workspace-Thêm/xóa member-Phân quyền |
+| **BR-03** | Quản lý Project | Tạo, sửa, xóa project trong workspace. | Must | - CRUD project- Gán member- Hiển thị danh sách |
+| **BR-04** | Quản lý Milestone | Tạo milestone để xác định mốc công việc. | Must | - Tạo milestone- Gán deadline |
+| **BR--05** | Quản lý Task | Task là đơn vị chính, gồm title, description, assignee, status, priority. | Must | - CRUD task- Assign user- Update status |
+| **BR-06** | Trạng thái Task | Hỗ trợ trạng thái To-do, In Progress, Done. | Must | - Chuyển trạng thái- Hiển thị đúng |
+| **BR-07** | Sub-task | Task có thể chia thành sub-task. | Must | - Tạo subtask- Link với task cha |
+| **BR-08**| Checklist | Task hỗ trợ checklist nhỏ. | Should | - Tạo checklist item- Tick hoàn thành |
+| **BR-09** | Comment | Comment trực tiếp trên task. | Must | - Thêm/xóa comment- Hiển thị lịch sử |
+
+### 6.2. Quản lý Người dùng & Phân quyền 
+| ID | Tên yêu cầu | Mô tả | Ưu tiên | Tiêu chí chấp nhận |
+|----|-------------|-------|---------|--------------------|
+| **BR-010** | Quản lý User  | Admin quản lý user hệ thống. | Must | - Tạo/Sửa/Xóa User |
+| **BR-011** | Role & Permission | Hệ thống phân quyền theo role. | Must | - Role: Admin, Owner, Manager, Member, Guest- Kiểm tra |
+| **BR-012** | Phân quyền Workspace | Phân quyền theo workspace. | Must | - Gắn role trong workspace- Kiểm soát truy cập |
+| **BR-013** | Phân quyền Project | Phân quyền theo project | Must | - Member chỉ thấy project dược gán | 
+| **BR-014** | Gán nhiều user | Task có thể assign nhiều người | Should | - Add nhiều assignee |
+
+### 6.3. Xác thực & bảo mật
+| ID | Tên yêu cầu | Mô tả | Ưu tiên | Tiêu chí chấp nhận |
+|----|-------------|-------|---------|--------------------|
+| **BR-015** | Đăng ký | Người dùng tạo tài khoản | Must | - Nhập email/password- Validate |
+| **BR-016** | Đăng nhập | Người dùng đăng nhập hệ thống | Must | - Login thành công- Token/sesion |
+| **BR-017** | Đăng xuất | Người dùng logout | Must | - Clear session |
+| **BR-018** | Bảo mật | Hệ thống đảm bảo an thống đảm bảo an toàn dữ liệu | Must | - Password mã hóa- Kiểm soát truy cập |
+
+### 6.4. Cộng tác & Giao tiếp 
+| ID | Tên yêu cầu | Mô tả | Ưu tiên | Tiêu chí chấp nhận |
+|----|-------------|-------|---------|--------------------|
+| **BR-019** | Comment nâng cao | Comment hỗ trợ mention user. | Should | - @user- Highlight | 
+| **BR-020** | Thông báo cơ bản  | Hiển thị thông báo khi có thay đổi. | Should | - Khi assign task- Khi có comment |
+| **BR-021** | Lịch sử hoạt động | Lưu log hành động. | Should | - Hiển thị activity log |
+
+### 6.5. Theo dõi & Báo cáo 
+| ID | Tên yêu cầu | Mo tả | Ưu tiên | Tiêu chí chấp nhận |
+|----|-------------|-------|---------|--------------------|
+| **BR-022** | Theo dõi tiến độ | Hiển thị % hoàn thành project | Should | Tính từ task |
+| **BR-023** | Dashboard | Hiển thị tổng quan project | Could | Task theo status |
+| **BR-024** | Lọc & tìm kiếm | Tìm kiếm task | Should | - Search theo tên- Filter theo status |
+
+### 6.6. Mở rộng & Tùy chỉnh 
+| ID | Tên yêu cầu | Mô tả | Ưu tiên | Tiêu chí chấp nhận |
+|----|-------------|-------|---------|--------------------|
+| **BR-025** | Custom Fields | Thêm field tùy chỉnh | Should | - Tạo field- Hiển thị form |
+| **BR-026** | Label/Tag | Gắn nhãn cho task | Should | - Add label- Filter |
+| **BR-027** | Attachment | Đính kèm file vào task | Should | - Upload file- Dowload |
+| **BR-028** | Dependency | Task phụ thuộc nhau | Could | - Task A -> B |
+
+### 6.7. Hiệu năng & Hệ thống 
+| ID | Tên yêu cầu | Mô tả | Ưu tiên | Tiêu chí chấp nhận |
+|----|-------------|-------|---------|--------------------|
+| **BR-029** | Hiệu năng | Hệ thống xử lý nhanh | Must | - Load <3s |
+| **BR-030** | Khả năng mở rộng | Hỗ trợ nhiều user | Should | Không crash |
+| **BR-031** | Tính ổn định | Hệ thống hoạt động ổn định | Must | Không lỗi nghiêm trọng | 
