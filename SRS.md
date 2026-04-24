@@ -82,7 +82,7 @@ Workspace → Project → Milestone → Task → User
 #### 4.1.1. Workspace Admin
 
 | # | Chức năng | Mô tả | Kết quả mong đợi |
-|---|-----------|-------|
+|---|-----------|-------|------------------|
 | **FR-01** | Tạo workspace | Cho phép Admin tạo workspace với tên, mô tả | Workspace được tạo thành công và hiển thị trong danh sách |
 | **FR-02** | Cập nhật workspace | Workspace Admin chỉnh sửa các thông tin như tên, mô tả hoặc cấu hình của workspace hiện tại | Thông tin workspace được cập nhật chính xác |
 | **FR-03** | Xóa workspace | Workspace Admin thực hiện thao tác xóa workspace và xác nhận hành động này | Workspace bị xóa khỏi hệ thống |
