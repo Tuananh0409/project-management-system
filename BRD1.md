@@ -27,9 +27,6 @@ l# Nền tảng Quản lý Dự án & Công việc Nội bộ — CTEL PM
 8. [Use-case tổng quan](#8-use-case-tổng-quan)
 9. [Ràng buộc & Giả định](#9-ràng-buộc--giả-định)
 10. [Phân tích rủi ro](#10-phân-tích-rủi-ro)
-11. [Tiêu chí chấp nhận & Đo lường thành công](#11-tiêu-chí-chấp-nhận--đo-lường-thành-công)
-12. [Lộ trình triển khai](#12-lộ-trình-triển-khai)
-13. [Phụ lục](#13-phụ-lục)
 
 ---
 
