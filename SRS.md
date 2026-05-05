@@ -53,6 +53,7 @@ Các bộ phận khác theo cơ cấu tổ chức của công ty
 | S8 | Phân quyền truy cập | Hệ thống áp dụng RBAC để kiểm soát truy cập theo role và phạm vi (workspace/project) |
 | S9 | Dashboard & báo cáo | Hệ thống hiển thị tổng quan tiến độ project, task và workload của user |
 | S10 | Xác thực người dùng | Hệ thống hỗ trợ đăng ký, đăng nhập và quản lý phiên làm việc của người dùng |
+| S11 | Intergration (HRM/CRM) | Cho phép liên kết thông tin từ nhiều hệ thống khác nhau trong công ty
 
 ### 2.2. Ngoài phạm vi
 
@@ -60,7 +61,7 @@ Các bộ phận khác theo cơ cấu tổ chức của công ty
 |---|----------|-------|
 | O1 | AI & Automation | Để phase sau |
 | O2 | Mobile native app | Web responsive đủ cho MVP |
-| O3 | Integration (HRM/CRM) | Chưa cần thiết giai đoạn đầu |
+
 
 ## 3. Khái quát yêu cầu
 ### 3.1. Mô hình tổng quan
@@ -70,7 +71,7 @@ Workspace → Project → Milestone → Task → User
 
 | STT | Bước quy trình | Người thực hiện | Mô tả bước thực hiện |
 |-----|----------------|-----------------|----------------------|
-| 1 | Thiết lập Workspace và người dùng | Admin | Tạo workspace cho phòng ban, thêm người dùng, gán vai trò và phân quyền truy cập hệ thống |
+| 1 | Thiết lập Workspace và người dùng | Admin, PM| Tạo workspace cho phòng ban, thêm người dùng, gán vai trò và phân quyền truy cập hệ thống |
 | 2 | Khởi tạo Project & phân quyền | Manager | Tạo dự án, nhập thông tin cơ bản và thiết lập quyền trong project, bao gồm việc chỉ định Lead (nếu có) để hỗ trợ quản lý và phân công công việc. |
 | 3 | Lập kế hoạch & tạo Task | Manager / Lead | Xây dựng milestone và tạo các, xác định nội dung công, độ ưu, deadline và phạm vi thực hiện |
 | 4 | Phân công & thực hiện Task | Manager / Lead / User | Manager hoặc Lead phân công task cho nhân sự; User thực hiện công việc, cập nhật trạng thái, tiến độ và kết quả trên hệ thống |
@@ -100,6 +101,8 @@ Workspace → Project → Milestone → Task → User
 | **FR-02** | Xem chi tiết workspace | Member truy cập workspace để xem các thông tin cơ bản | Thông tin workspace hiển thị |
 | **FR-03** | Xem chi tiết workspace | Member truy cập workspace để xem các thông tin cơ bản | Thông tin workspace hiển thị |
 | **FR-04** | Tham gia workspace | Member chấp nhận lời mời tham gia workspace từ hệ thống | Member tham gia workspace thành công |  
+
+
 
 ### 4.2. Project Module
 #### 4.2.1. Project Admin
