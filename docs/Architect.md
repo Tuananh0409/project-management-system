@@ -57,6 +57,7 @@ Dashboard KPI, báo cáo theo dự án, team.
 
 #### 2.2.2. Ngoài phạm vi
 | # | Hạng mục | Lý do |
+|---|----------|-------|
 | S1 | Tích hợp sâu bên thứ ba | Vẫn đang trong giai đoạn khảo sát yêu cầu và cần thống nhất giao thức kết nối với các bộ phận liên quan. | 
 | S2 | Quản trị tài chính dự án | Ưu tiên hoàn thiện các tính năng quản lý tiến độ cốt lõi trước khi mở rộng sang module kế toán phức tạp. |
 | S3 | Biểu đồ luồng chi tiết | Thiếu hụt các phiên thảo luận chuyên sâu với Stakeholders để xác định mọi trường hợp nghiệp vụ nhỏ nhất. |
