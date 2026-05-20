@@ -15,7 +15,7 @@ export function Modal({ title, children, onClose }: Props) {
         className="absolute inset-0 bg-slate-900/40"
         onClick={onClose}
       />
-      <div className="relative z-10 w-full max-w-lg rounded-xl bg-white p-6 text-slate-900 shadow-xl">
+      <div className="relative z-10 w-full max-w-lg rounded-2xl bg-white p-6 text-slate-900 shadow-2xl shadow-slate-900/15 ring-1 ring-slate-200/80">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
           <button

@@ -12,3 +12,7 @@
 body {
   @apply min-h-screen bg-slate-100 font-sans text-slate-900 antialiased;
 }
+
+[data-app-shell] main {
+  scrollbar-gutter: stable;
+}

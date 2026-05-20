@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 export type Breadcrumb = { label: string; to?: string };
 
 type Props = {
-  title: string;
+  title?: string;
   description?: string;
   breadcrumbs?: Breadcrumb[];
   actions?: ReactNode;
@@ -30,7 +30,9 @@ export function PageHeader({ title, description, breadcrumbs, actions }: Props) 
             ))}
           </nav>
         )}
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">{title}</h1>
+        {title ? (
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">{title}</h1>
+        ) : null}
         {description && (
           <p className="mt-1 max-w-2xl text-sm text-slate-500">{description}</p>
         )}

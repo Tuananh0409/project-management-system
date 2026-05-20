@@ -3,13 +3,14 @@ import type { Workspace } from "../types";
 
 type Props = {
   workspace: Pick<Workspace, "code" | "themeColor" | "logoUrl" | "name">;
-  size?: "sm" | "md";
+  size?: "sm" | "md" | "lg";
   className?: string;
 };
 
 const sizeClass = {
   sm: "h-6 w-6 text-[10px] rounded",
   md: "h-10 w-10 text-sm rounded-lg",
+  lg: "h-14 w-14 text-base rounded-2xl",
 } as const;
 
 export function WorkspaceAvatar({ workspace, size = "md", className = "" }: Props) {

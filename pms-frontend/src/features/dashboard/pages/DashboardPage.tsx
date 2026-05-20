@@ -6,11 +6,13 @@ import { Button } from "@/shared/components/ui/Button";
 import { ErrorAlert } from "@/shared/components/feedback/ErrorAlert";
 import { LoadingState } from "@/shared/components/feedback/LoadingState";
 import { useAuth } from "@/shared/context/AuthContext";
+import { canCreateWorkspace } from "@/shared/utils/workspacePermissions";
 import { workspaceApi } from "@/features/workspace/api/workspaceApi";
 import type { Workspace } from "@/features/workspace/types";
 
 export function DashboardPage() {
   const { user } = useAuth();
+  const canCreate = canCreateWorkspace(user);
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -74,10 +76,19 @@ export function DashboardPage() {
           <LoadingState />
         ) : workspaces.length === 0 ? (
           <p className="text-sm text-slate-500">
-            Chưa có workspace.{" "}
-            <Link to="/workspaces" className="font-medium text-brand-600 hover:underline">
-              Tạo workspace đầu tiên
-            </Link>
+            {canCreate ? (
+              <>
+                Chưa có workspace.{" "}
+                <Link to="/workspaces" className="font-medium text-brand-600 hover:underline">
+                  Tạo workspace đầu tiên
+                </Link>
+              </>
+            ) : (
+              <>
+                Bạn chưa thuộc workspace nào. Chờ admin mời hoặc kiểm tra{" "}
+                <span className="font-medium text-slate-700">thông báo</span> (🔔 trên góc phải).
+              </>
+            )}
           </p>
         ) : (
           <ul className="divide-y divide-slate-100">

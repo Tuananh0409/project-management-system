@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { projectApi } from "@/features/project/api/projectApi";
+import { ChevronRight, Ellipsis, ListTodo, Plus } from "lucide-react";import { projectApi } from "@/features/project/api/projectApi";
 import type { ProjectSummary } from "@/features/project/types";
 import { workspaceApi } from "../api/workspaceApi";
 import type { Workspace } from "../types";
@@ -10,6 +10,7 @@ import {
   APP_EVENTS,
   type WorkspacesChangedDetail,
 } from "@/shared/events/appEvents";
+import { canCreateWorkspace } from "@/shared/utils/workspacePermissions";
 import { CreateWorkspaceModal } from "./CreateWorkspaceModal";
 import { WorkspaceAvatar } from "./WorkspaceAvatar";
 
@@ -32,28 +33,12 @@ function persistExpandedIds(ids: Set<number>) {
 
 function projectNavClass({ isActive }: { isActive: boolean }) {
   return [
-    "flex items-center gap-2 rounded-md py-1.5 pl-8 pr-2 text-sm transition",
+    "flex items-center gap-2 rounded-lg py-1.5 pl-7 pr-2 text-sm transition",
     isActive
-      ? "bg-brand-600/90 font-medium text-white"
-      : "text-slate-400 hover:bg-slate-800 hover:text-white",
+      ? "bg-brand-600/95 font-medium text-white shadow-sm"
+      : "text-slate-400 hover:bg-slate-800/90 hover:text-white",
   ].join(" ");
 }
-
-function ProjectIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      className="h-4 w-4 shrink-0 opacity-70"
-    >
-      <path d="M9 11l3 3L22 4" />
-      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-    </svg>
-  );
-}
-
 type Props = {
   onWorkspacesLoaded?: (workspaces: Workspace[]) => void;
 };
@@ -61,8 +46,7 @@ type Props = {
 export function WorkspaceSidebarTree({ onWorkspacesLoaded }: Props) {
   const { user } = useAuth();
   const location = useLocation();
-  const canCreateWorkspace =
-    user?.email?.toLowerCase() === "admin@ctel.local" || user?.id === 1;
+  const canCreate = canCreateWorkspace(user);
 
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [loading, setLoading] = useState(true);
@@ -185,27 +169,24 @@ export function WorkspaceSidebarTree({ onWorkspacesLoaded }: Props) {
   return (
     <>
       <div className="mb-2 flex items-center justify-between px-3">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
           Phòng ban
         </p>
-        {canCreateWorkspace && (
+        {canCreate && (
           <button
             type="button"
             onClick={() => setShowCreate(true)}
-            className="rounded p-0.5 text-slate-400 hover:bg-slate-800 hover:text-white"
+            className="rounded-md p-1 text-slate-500 transition hover:bg-white/10 hover:text-white"
             title="Tạo phòng ban"
             aria-label="Tạo phòng ban"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
-              <path d="M12 5v14M5 12h14" />
-            </svg>
+            <Plus className="h-4 w-4" strokeWidth={2} />
           </button>
-        )}
-      </div>
+        )}      </div>
 
       {workspaces.length === 0 ? (
         <p className="px-3 py-2 text-xs leading-relaxed text-slate-500">
-          {canCreateWorkspace
+          {canCreate
             ? "Chưa có phòng ban. Nhấn + để tạo."
             : "Bạn chưa tham gia phòng ban nào. Chờ admin mời."}
         </p>
@@ -221,60 +202,49 @@ export function WorkspaceSidebarTree({ onWorkspacesLoaded }: Props) {
               <li key={workspace.id}>
                 <div
                   className={[
-                    "group flex items-center gap-1 rounded-lg pr-1 transition",
+                    "group flex items-center gap-1 rounded-xl pr-1 transition",
                     isActiveWorkspace && !location.pathname.includes("/projects/")
-                      ? "bg-slate-800"
-                      : "hover:bg-slate-800/60",
+                      ? "bg-white/10 shadow-sm ring-1 ring-white/10"
+                      : "hover:bg-white/5",
                   ].join(" ")}
                 >
                   <button
                     type="button"
                     onClick={() => toggleExpanded(workspace.id)}
-                    className="flex shrink-0 items-center justify-center rounded p-1 text-slate-400 hover:text-white"
+                    className="flex shrink-0 items-center justify-center rounded-lg p-1 text-slate-500 hover:bg-white/10 hover:text-white"
                     aria-expanded={isExpanded}
                     aria-label={isExpanded ? "Thu gọn" : "Mở rộng"}
                   >
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
+                    <ChevronRight
                       className={[
-                        "h-3.5 w-3.5 transition-transform",
+                        "h-4 w-4 transition-transform duration-200",
                         isExpanded ? "rotate-90" : "",
                       ].join(" ")}
-                    >
-                      <path d="M9 18l6-6-6-6" />
-                    </svg>
+                      strokeWidth={2}
+                    />
                   </button>
-
                   <Link
                     to={`/workspaces/${workspace.id}`}
                     className="flex min-w-0 flex-1 items-center gap-2 py-2 pr-1"
                     title={workspace.name}
                   >
                     <WorkspaceAvatar workspace={workspace} size="sm" />
-                    <span className="min-w-0 flex-1 truncate text-sm font-medium text-slate-200 group-hover:text-white">
+                    <span className="min-w-0 flex-1 truncate text-sm font-medium text-slate-100 group-hover:text-white">
                       {workspace.name}
                     </span>
                   </Link>
 
                   <Link
                     to={`/workspaces/${workspace.id}`}
-                    className="rounded p-1 text-slate-500 opacity-0 transition group-hover:opacity-100 hover:bg-slate-700 hover:text-white"
+                    className="rounded-md p-1 text-slate-500 opacity-0 transition group-hover:opacity-100 hover:bg-white/10 hover:text-white"
                     title="Cài đặt phòng ban"
                     aria-label="Cài đặt phòng ban"
                   >
-                    <svg viewBox="0 0 24 24" fill="currentColor" className="h-3.5 w-3.5">
-                      <circle cx="5" cy="12" r="1.5" />
-                      <circle cx="12" cy="12" r="1.5" />
-                      <circle cx="19" cy="12" r="1.5" />
-                    </svg>
-                  </Link>
-                </div>
+                    <Ellipsis className="h-4 w-4" strokeWidth={2} />
+                  </Link>                </div>
 
                 {isExpanded && (
-                  <div className="relative ml-3 border-l border-slate-700/80 pl-1">
+                  <div className="relative ml-3 border-l border-white/10 pl-2">
                     {isLoadingProjects && !projects && (
                       <p className="py-1.5 pl-8 text-xs text-slate-500">Đang tải dự án…</p>
                     )}
@@ -289,8 +259,7 @@ export function WorkspaceSidebarTree({ onWorkspacesLoaded }: Props) {
                               to={`/workspaces/${workspace.id}/projects/${project.id}`}
                               className={projectNavClass}
                             >
-                              <ProjectIcon />
-                              <span className="min-w-0 flex-1 truncate">{project.name}</span>
+                              <ListTodo className="h-4 w-4 shrink-0 opacity-80" strokeWidth={2} />                              <span className="min-w-0 flex-1 truncate">{project.name}</span>
                             </NavLink>
                           </li>
                         ))}
@@ -304,7 +273,7 @@ export function WorkspaceSidebarTree({ onWorkspacesLoaded }: Props) {
         </ul>
       )}
 
-      {canCreateWorkspace && showCreate && (
+      {canCreate && showCreate && (
         <CreateWorkspaceModal
           onClose={() => setShowCreate(false)}
           onCreated={() => {
