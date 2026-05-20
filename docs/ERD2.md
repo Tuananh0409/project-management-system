@@ -141,6 +141,7 @@ erDiagram
         int project_id FK
         int user_id FK "Mapping HRM"
         int role_id FK "Link PROJECT_ROLES"
+        datetime joined_at "Thời điểm tham gia dự án"
     }
 
     PROJECT_ROLES {

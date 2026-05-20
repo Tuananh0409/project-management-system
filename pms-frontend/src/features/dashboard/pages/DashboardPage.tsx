@@ -1,0 +1,100 @@
+import { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { ApiClientError } from "@/shared/api/client";
+import { PageHeader } from "@/shared/components/layout/PageHeader";
+import { Button } from "@/shared/components/ui/Button";
+import { ErrorAlert } from "@/shared/components/feedback/ErrorAlert";
+import { LoadingState } from "@/shared/components/feedback/LoadingState";
+import { useAuth } from "@/shared/context/AuthContext";
+import { workspaceApi } from "@/features/workspace/api/workspaceApi";
+import type { Workspace } from "@/features/workspace/types";
+
+export function DashboardPage() {
+  const { user } = useAuth();
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      setWorkspaces(await workspaceApi.list());
+    } catch (err) {
+      setError(
+        err instanceof ApiClientError ? err.message : "Không tải được dữ liệu",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  return (
+    <>
+      <PageHeader
+        title={`Xin chào, ${user?.username ?? "bạn"}`}
+        description="Tổng quan hoạt động — các module khác sẽ bổ sung dần."
+      />
+
+      {error && <ErrorAlert message={error} className="mb-4" />}
+
+      <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {[
+          { label: "Workspace", value: loading ? "—" : String(workspaces.length), live: true },
+          { label: "Dự án", value: "—", live: false },
+          { label: "Task của tôi", value: "—", live: false },
+          { label: "Quá hạn", value: "—", live: false },
+        ].map((stat) => (
+          <div
+            key={stat.label}
+            className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+          >
+            <p className="text-sm text-slate-500">{stat.label}</p>
+            <p className="mt-1 text-3xl font-bold text-slate-900">{stat.value}</p>
+            {!stat.live && (
+              <p className="mt-1 text-xs text-amber-600">Sắp có</p>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="mb-4 flex items-center justify-between gap-4">
+          <h2 className="text-lg font-semibold text-slate-900">Workspace gần đây</h2>
+          <Link to="/workspaces">
+            <Button variant="secondary">Xem tất cả</Button>
+          </Link>
+        </div>
+
+        {loading ? (
+          <LoadingState />
+        ) : workspaces.length === 0 ? (
+          <p className="text-sm text-slate-500">
+            Chưa có workspace.{" "}
+            <Link to="/workspaces" className="font-medium text-brand-600 hover:underline">
+              Tạo workspace đầu tiên
+            </Link>
+          </p>
+        ) : (
+          <ul className="divide-y divide-slate-100">
+            {workspaces.slice(0, 5).map((w) => (
+              <li key={w.id}>
+                <Link
+                  to={`/workspaces/${w.id}`}
+                  className="flex items-center justify-between gap-4 py-3 hover:bg-slate-50"
+                >
+                  <span className="font-medium text-slate-900">{w.name}</span>
+                  <span className="text-sm text-slate-500">{w.myRole}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </>
+  );
+}
