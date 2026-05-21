@@ -70,13 +70,13 @@ export function WorkspaceListPage() {
         accent: "from-blue-500 to-indigo-500",
       },
       {
-        label: "Riêng tư",
+        label: "Private",
         value: privateCount,
         icon: ShieldCheck,
         accent: "from-emerald-500 to-teal-500",
       },
       {
-        label: "Nội bộ tổ chức",
+        label: "Public",
         value: orgWide,
         icon: UsersRound,
         accent: "from-fuchsia-500 to-pink-500",
@@ -152,8 +152,8 @@ export function WorkspaceListPage() {
                 className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
               >
                 <option value="ALL">Tất cả</option>
-                <option value="PRIVATE">Riêng tư</option>
-                <option value="ORG_WIDE">Nội bộ tổ chức</option>
+                <option value="PRIVATE">Private</option>
+                <option value="ORG_WIDE">Public</option>
               </select>
             </div>
           </div>

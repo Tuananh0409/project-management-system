@@ -19,7 +19,7 @@ public class CreateWorkspaceRequest {
     @Size(max = 150, message = "Slug tối đa 150 ký tự")
     private String slug;
 
-    /** URL https — logo workspace (chuẩn Jira/Notion). */
+    /** Không dùng — logo tải lên qua POST /api/workspaces/{slug}/logo. */
     @Size(max = 500, message = "URL logo tối đa 500 ký tự")
     private String logoUrl;
 

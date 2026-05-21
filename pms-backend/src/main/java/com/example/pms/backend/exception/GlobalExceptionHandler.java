@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -51,6 +52,27 @@ public class GlobalExceptionHandler {
                         .message(ErrorCode.VALIDATION_ERROR.getDefaultMessage())
                         .timestamp(Instant.now())
                         .fieldErrors(fieldErrors)
+                        .build());
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiErrorResponse> handleDataIntegrity(DataIntegrityViolationException ex) {
+        String message = "Dữ liệu trùng với bản ghi khác (tên, mã hoặc slug phòng ban)";
+        String raw = ex.getMostSpecificCause() != null ? ex.getMostSpecificCause().getMessage() : "";
+        if (raw != null) {
+            if (raw.contains("uq_workspaces_code")) {
+                message = "Mã phòng ban đã tồn tại — hệ thống sẽ tự gợi ý mã khác khi bạn tạo lại";
+            } else if (raw.contains("uq_workspaces_slug")) {
+                message = "Slug URL phòng ban đã tồn tại";
+            } else if (raw.contains("uq_workspaces_name")) {
+                message = "Tên phòng ban đã tồn tại";
+            }
+        }
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiErrorResponse.builder()
+                        .code(ErrorCode.WORKSPACE_NAME_EXISTS.getCode())
+                        .message(message)
+                        .timestamp(Instant.now())
                         .build());
     }
 

@@ -20,7 +20,7 @@ public class WorkspaceMapper {
                 .description(workspace.getDescription())
                 .code(workspace.getCode())
                 .slug(workspace.getSlug())
-                .logoUrl(workspace.getLogoUrl())
+                .logoUrl(resolveLogoUrlForClient(workspace))
                 .ownerId(owner.getId())
                 .ownerUsername(owner.getUsername())
                 .privacyMode(workspace.getPrivacyMode())
@@ -42,6 +42,18 @@ public class WorkspaceMapper {
                 .roleName(member.getRole().getRoleName())
                 .joinedAt(member.getJoinedAt())
                 .build();
+    }
+
+    /** URL logo cho client: API upload hoặc https legacy. */
+    public String resolveLogoUrlForClient(Workspace workspace) {
+        String raw = workspace.getLogoUrl();
+        if (raw == null || raw.isBlank()) {
+            return null;
+        }
+        if (raw.startsWith("/api/workspaces/") || raw.startsWith("http://") || raw.startsWith("https://")) {
+            return raw;
+        }
+        return WorkspaceLogoService.buildLogoApiPath(workspace.getSlug());
     }
 
     public InvitationResponse toInvitationResponse(WorkspaceInvitation invitation) {

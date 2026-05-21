@@ -17,6 +17,13 @@ public interface WorkspaceRepository extends JpaRepository<Workspace, Long> {
 
     boolean existsBySlugIgnoreCaseAndDeletedFalse(String slug);
 
+    /** Trùng trên mọi bản ghi (kể cả đã xóa mềm) — khớp UNIQUE trong DB. */
+    boolean existsByNameIgnoreCase(String name);
+
+    boolean existsByCodeIgnoreCase(String code);
+
+    boolean existsBySlugIgnoreCase(String slug);
+
     Optional<Workspace> findByIdAndDeletedFalse(Long id);
 
     Optional<Workspace> findBySlugIgnoreCaseAndDeletedFalse(String slug);

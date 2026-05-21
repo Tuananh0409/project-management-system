@@ -11,15 +11,18 @@ import {
   WORKSPACE_COLOR_PRESETS,
   WORKSPACE_PRIVACY_OPTIONS,
 } from "@/shared/config/workspace-options";
+import { LogoUploadField } from "../LogoUploadField";
 import type { WorkspaceCreatePreviewState } from "./WorkspaceCreatePreview";
 
 type Props = {
   error: string;
   state: WorkspaceCreatePreviewState;
+  logoPreview: string | null;
   showAdvanced: boolean;
   code: string;
   slug: string;
   onStateChange: (patch: Partial<WorkspaceCreatePreviewState>) => void;
+  onLogoFileSelect: (file: File | null) => void;
   onShowAdvancedChange: (open: boolean) => void;
   onCodeChange: (code: string) => void;
   onSlugChange: (slug: string) => void;
@@ -32,7 +35,9 @@ export function WorkspaceCreateForm({
   showAdvanced,
   code,
   slug,
+  logoPreview,
   onStateChange,
+  onLogoFileSelect,
   onShowAdvancedChange,
   onCodeChange,
   onSlugChange,
@@ -93,19 +98,8 @@ export function WorkspaceCreateForm({
             onChange={(themeColor) => onStateChange({ themeColor })}
           />
         </FormField>
-        <FormField
-          label="URL logo"
-          className="mt-5"
-          hint="Ảnh https — upload file sẽ bổ sung sau."
-        >
-          <input
-            type="url"
-            value={state.logoUrl}
-            onChange={(e) => onStateChange({ logoUrl: e.target.value })}
-            maxLength={500}
-            className={inputClass}
-            placeholder="https://…"
-          />
+        <FormField label="Logo phòng ban" className="mt-5" hint="Tùy chọn — có thể đổi sau trên trang chi tiết.">
+          <LogoUploadField previewUrl={logoPreview} onFileSelect={onLogoFileSelect} />
         </FormField>
       </Panel>
 

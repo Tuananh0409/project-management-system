@@ -1,4 +1,4 @@
-import { type FormEvent, useMemo, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { ArrowLeft, Building2, Sparkles } from "lucide-react";
 import { ApiClientError } from "@/shared/api/client";
@@ -22,7 +22,7 @@ const initialState: WorkspaceCreatePreviewState = {
   name: "",
   description: "",
   themeColor: WORKSPACE_COLOR_PRESETS[0],
-  logoUrl: "",
+  logoPreview: null,
   privacyMode: "PRIVATE",
   timezone: "Asia/Ho_Chi_Minh",
 };
@@ -39,11 +39,29 @@ export function CreateWorkspacePage() {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const logoFileRef = useRef<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   const codeHint = useMemo(
     () => (showAdvanced && code.trim() ? code.trim().toUpperCase() : guessWorkspaceCode(form.name)),
     [code, form.name, showAdvanced],
   );
+
+  useEffect(() => {
+    return () => {
+      if (logoPreview?.startsWith("blob:")) {
+        URL.revokeObjectURL(logoPreview);
+      }
+    };
+  }, [logoPreview]);
+
+  function handleLogoFileSelect(file: File | null) {
+    if (logoPreview?.startsWith("blob:")) {
+      URL.revokeObjectURL(logoPreview);
+    }
+    logoFileRef.current = file;
+    setLogoPreview(file ? URL.createObjectURL(file) : null);
+  }
 
   if (!canCreate) {
     return <Navigate to="/workspaces" replace />;
@@ -57,13 +75,25 @@ export function CreateWorkspacePage() {
       const created = await workspaceApi.create({
         name: form.name,
         description: form.description.trim() || undefined,
-        logoUrl: form.logoUrl.trim() || undefined,
         privacyMode: form.privacyMode,
         themeColor: form.themeColor,
         timezone: form.timezone,
         code: showAdvanced && code.trim() ? code.trim() : undefined,
         slug: showAdvanced && slug.trim() ? slug.trim() : undefined,
       });
+
+      if (logoFileRef.current) {
+        try {
+          await workspaceApi.uploadLogo(created.slug, logoFileRef.current);
+        } catch (err) {
+          toast.error(
+            err instanceof ApiClientError
+              ? err.message
+              : "Đã tạo phòng ban nhưng không tải được logo — thử lại trên trang chi tiết",
+          );
+        }
+      }
+
       toast.success("Đã tạo phòng ban thành công");
       notifyWorkspacesChanged({ workspaceId: created.id });
       navigate(workspacePath(created.slug), { replace: true });
@@ -75,6 +105,11 @@ export function CreateWorkspacePage() {
       setSubmitting(false);
     }
   }
+
+  const previewState: WorkspaceCreatePreviewState = {
+    ...form,
+    logoPreview,
+  };
 
   return (
     <div className="pb-24 lg:pb-8">
@@ -114,10 +149,12 @@ export function CreateWorkspacePage() {
           <WorkspaceCreateForm
             error={submitError}
             state={form}
+            logoPreview={logoPreview}
             showAdvanced={showAdvanced}
             code={code}
             slug={slug}
             onStateChange={(patch) => setForm((prev) => ({ ...prev, ...patch }))}
+            onLogoFileSelect={handleLogoFileSelect}
             onShowAdvancedChange={setShowAdvanced}
             onCodeChange={setCode}
             onSlugChange={setSlug}
@@ -140,7 +177,7 @@ export function CreateWorkspacePage() {
           </div>
         </div>
         <div className="lg:col-span-2">
-          <WorkspaceCreatePreview state={form} codeHint={codeHint} />
+          <WorkspaceCreatePreview state={previewState} codeHint={codeHint} />
         </div>
       </div>
 

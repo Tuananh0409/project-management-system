@@ -1,16 +1,23 @@
-/** Giá trị gửi API — chuẩn SaaS cho workspace / team space. */
+/** Giá trị gửi API — PRIVATE | ORG_WIDE (hiển thị: Private | Public). */
 export const WORKSPACE_PRIVACY_OPTIONS = [
   {
     value: "PRIVATE",
-    label: "Riêng tư",
-    hint: "Chỉ người được mời mới truy cập (mặc định, giống Jira/Asana private team).",
+    label: "Private",
+    hint: "Chỉ thành viên được mời mới truy cập phòng ban / dự án.",
   },
   {
     value: "ORG_WIDE",
-    label: "Nội bộ tổ chức",
-    hint: "Hiện trong danh sách workspace công ty; phù hợp phòng ban công khai nội bộ.",
+    label: "Public",
+    hint: "Hiển thị trong danh sách công ty; phù hợp phòng ban mọi người trong org đều thấy.",
   },
 ] as const;
+
+export function getPrivacyModeLabel(value: string | null | undefined): string {
+  const found = WORKSPACE_PRIVACY_OPTIONS.find(
+    (o) => o.value === (value ?? "").toUpperCase(),
+  );
+  return found?.label ?? value ?? "Private";
+}
 
 /** Múi giờ IANA thường dùng (khu vực VN + ASEAN). */
 export const COMMON_TIMEZONES = [

@@ -37,6 +37,10 @@ public enum ErrorCode {
     ATTACHMENT_TOO_LARGE("ERR_PJ_09", "File vượt quá dung lượng cho phép (tối đa 20MB)", HttpStatus.BAD_REQUEST),
     ATTACHMENT_TYPE_NOT_ALLOWED("ERR_PJ_10", "Định dạng file không được phép", HttpStatus.BAD_REQUEST),
     ATTACHMENT_FORBIDDEN("ERR_PJ_11", "Bạn không có quyền thao tác tệp đính kèm này", HttpStatus.FORBIDDEN),
+    WORKSPACE_LOGO_NOT_FOUND("ERR_WS_13", "Workspace chưa có logo", HttpStatus.NOT_FOUND),
+    WORKSPACE_LOGO_TOO_LARGE("ERR_WS_14", "Logo vượt quá dung lượng cho phép (tối đa 2MB)", HttpStatus.BAD_REQUEST),
+    WORKSPACE_LOGO_TYPE_NOT_ALLOWED(
+            "ERR_WS_15", "Logo chỉ hỗ trợ PNG, JPG, GIF hoặc WebP", HttpStatus.BAD_REQUEST),
     VALIDATION_ERROR("ERR_VALIDATION", "Dữ liệu không hợp lệ", HttpStatus.BAD_REQUEST);
 
     private final String code;

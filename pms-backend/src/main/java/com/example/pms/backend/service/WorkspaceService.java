@@ -62,7 +62,8 @@ public class WorkspaceService {
             throw new BusinessException(ErrorCode.WORKSPACE_FORBIDDEN, "Chỉ admin hệ thống mới được tạo workspace");
         }
 
-        if (workspaceRepository.existsByNameIgnoreCaseAndDeletedFalse(request.getName())) {
+        String name = request.getName().trim();
+        if (workspaceRepository.existsByNameIgnoreCase(name)) {
             throw new BusinessException(ErrorCode.WORKSPACE_NAME_EXISTS);
         }
 
@@ -75,7 +76,7 @@ public class WorkspaceService {
 
         String baseCode = code;
         int codeSuffix = 1;
-        while (workspaceRepository.existsByCodeIgnoreCaseAndDeletedFalse(code)) {
+        while (workspaceRepository.existsByCodeIgnoreCase(code)) {
             codeSuffix++;
             code = baseCode + codeSuffix;
             if (code.length() > 50) {
@@ -87,8 +88,19 @@ public class WorkspaceService {
                 break;
             }
         }
-        if (workspaceRepository.existsBySlugIgnoreCaseAndDeletedFalse(slug)) {
-            slug = slug + "-" + System.currentTimeMillis() % 10000;
+        int slugSuffix = 0;
+        String baseSlug = slug;
+        while (workspaceRepository.existsBySlugIgnoreCase(slug)) {
+            slugSuffix++;
+            slug = baseSlug + "-" + slugSuffix;
+            if (slug.length() > 150) {
+                slug = baseSlug + "-" + (System.currentTimeMillis() % 10000);
+                break;
+            }
+            if (slugSuffix > 500) {
+                slug = baseSlug + "-" + (System.currentTimeMillis() % 10000);
+                break;
+            }
         }
 
         if (request.getPrivacyMode() != null
@@ -101,14 +113,12 @@ public class WorkspaceService {
         String privacy = WorkspacePrivacy.normalizeOrDefault(request.getPrivacyMode());
         String themeColor = normalizeThemeColor(request.getThemeColor());
         String timezone = resolveTimezone(request.getTimezone());
-        String logoUrl = resolveLogoUrl(request.getLogoUrl());
-
         Workspace workspace = Workspace.builder()
-                .name(request.getName().trim())
+                .name(name)
                 .description(request.getDescription())
                 .code(code)
                 .slug(slug)
-                .logoUrl(logoUrl)
+                .logoUrl(null)
                 .owner(currentUser)
                 .privacyMode(privacy)
                 .themeColor(themeColor)
@@ -162,11 +172,8 @@ public class WorkspaceService {
         if (request.getDescription() != null) {
             workspace.setDescription(request.getDescription());
         }
-        if (request.getLogoUrl() != null) {
-            workspace.setLogoUrl(
-                    request.getLogoUrl().isBlank()
-                            ? null
-                            : resolveLogoUrl(request.getLogoUrl().trim()));
+        if (request.getLogoUrl() != null && request.getLogoUrl().isBlank()) {
+            workspace.setLogoUrl(null);
         }
         if (request.getPrivacyMode() != null && !request.getPrivacyMode().isBlank()) {
             if (!WorkspacePrivacy.isAllowed(request.getPrivacyMode())) {

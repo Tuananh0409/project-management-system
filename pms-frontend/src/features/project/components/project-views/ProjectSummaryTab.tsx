@@ -1,6 +1,7 @@
 import { Calendar } from "lucide-react";
 import type { ProjectDetail, ProjectMember } from "../../types";
 import { Badge } from "@/shared/components/ui/Badge";
+import { getPrivacyModeLabel } from "@/shared/config/workspace-options";
 import { ProjectAttachmentsSection } from "../ProjectAttachmentsSection";
 
 type Props = {
@@ -34,7 +35,7 @@ export function ProjectSummaryTab({
             <div className="flex flex-wrap gap-2">
               {project.statusName && <Badge variant="muted">{project.statusName}</Badge>}
               <Badge variant="muted">
-                {project.privacyMode === "ORG_WIDE" ? "Nội bộ tổ chức" : "Riêng tư"}
+                {getPrivacyModeLabel(project.privacyMode)}
               </Badge>
               {project.myRole && <Badge variant="brand">Vai trò: {project.myRole}</Badge>}
             </div>

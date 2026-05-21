@@ -5,7 +5,7 @@ export type WorkspaceCreatePreviewState = {
   name: string;
   description: string;
   themeColor: string;
-  logoUrl: string;
+  logoPreview: string | null;
   privacyMode: string;
   timezone: string;
 };
@@ -38,14 +38,11 @@ export function WorkspaceCreatePreview({ state, codeHint }: Props) {
               className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-white shadow-md ring-2 ring-white"
               style={{ backgroundColor: state.themeColor }}
             >
-              {state.logoUrl.trim() ? (
+              {state.logoPreview ? (
                 <img
-                  src={state.logoUrl}
+                  src={state.logoPreview}
                   alt=""
                   className="h-full w-full rounded-xl object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = "none";
-                  }}
                 />
               ) : (
                 <Building2 className="h-6 w-6" strokeWidth={1.75} />

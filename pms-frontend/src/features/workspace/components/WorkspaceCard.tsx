@@ -1,6 +1,7 @@
 import { Clock3, Globe2, Shield, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/shared/components/ui/Badge";
+import { getPrivacyModeLabel } from "@/shared/config/workspace-options";
 import { workspacePath } from "@/shared/routes/paths";
 import type { Workspace } from "../types";
 import { WorkspaceAvatar } from "./WorkspaceAvatar";
@@ -8,7 +9,7 @@ import { WorkspaceAvatar } from "./WorkspaceAvatar";
 type Props = { workspace: Workspace };
 
 export function WorkspaceCard({ workspace }: Props) {
-  const isOrgWide = workspace.privacyMode === "ORG_WIDE";
+  const privacyLabel = getPrivacyModeLabel(workspace.privacyMode);
   const isActive = workspace.status.toLowerCase() === "active";
 
   return (
@@ -53,7 +54,7 @@ export function WorkspaceCard({ workspace }: Props) {
               <span className="uppercase tracking-wide">Quyền riêng tư</span>
             </div>
             <p className="font-semibold text-slate-800">
-              {isOrgWide ? "Nội bộ tổ chức" : "Riêng tư"}
+              {privacyLabel}
             </p>
           </div>
           <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-slate-600">

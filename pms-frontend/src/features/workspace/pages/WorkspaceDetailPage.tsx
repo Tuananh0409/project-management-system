@@ -15,12 +15,14 @@ import { Button } from "@/shared/components/ui/Button";
 import { Badge } from "@/shared/components/ui/Badge";
 import { ErrorAlert } from "@/shared/components/feedback/ErrorAlert";
 import { LoadingState } from "@/shared/components/feedback/LoadingState";
+import { getPrivacyModeLabel } from "@/shared/config/workspace-options";
 import { workspaceApi } from "../api/workspaceApi";
 import { InviteMemberModal } from "../components/InviteMemberModal";
 import { MemberTable } from "../components/MemberTable";
 import { PendingInvitationsList } from "../components/PendingInvitationsList";
 import { WorkspaceAvatar } from "../components/WorkspaceAvatar";
 import { WorkspaceDangerZone } from "../components/WorkspaceDangerZone";
+import { WorkspaceLogoSection } from "../components/WorkspaceLogoSection";
 import { WorkspaceProjectsSection } from "../components/WorkspaceProjectsSection";
 import { useToast } from "@/shared/context/ToastContext";
 import type { Invitation, Member, Workspace } from "../types";
@@ -124,7 +126,7 @@ export function WorkspaceDetailPage() {
   }
 
   const theme = workspace.themeColor ?? "#2563eb";
-  const isOrgWide = workspace.privacyMode === "ORG_WIDE";
+  const privacyLabel = getPrivacyModeLabel(workspace.privacyMode);
   const isActive = workspace.status.toLowerCase() === "active";
 
   return (
@@ -178,7 +180,7 @@ export function WorkspaceDetailPage() {
                   {isActive ? "Đang hoạt động" : workspace.status}
                 </Badge>
                 <Badge variant="muted" className="border border-slate-200 bg-slate-50 normal-case">
-                  {isOrgWide ? "Nội bộ tổ chức" : "Riêng tư"}
+                  {privacyLabel}
                 </Badge>
               </div>
             </div>
@@ -233,7 +235,7 @@ export function WorkspaceDetailPage() {
                 Quyền riêng tư
               </p>
               <p className="text-sm font-semibold text-slate-900">
-                {isOrgWide ? "ORG_WIDE" : "PRIVATE"}
+                {privacyLabel}
               </p>
             </div>
           </div>
@@ -250,6 +252,12 @@ export function WorkspaceDetailPage() {
           </span>
         </div>
       </div>
+
+      {isAdmin && workspace && (
+        <div className="mb-8">
+          <WorkspaceLogoSection workspace={workspace} onUpdated={setWorkspace} />
+        </div>
+      )}
 
       <div className="mb-8 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
