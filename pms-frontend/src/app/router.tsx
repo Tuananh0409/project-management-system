@@ -5,6 +5,7 @@ import { RegisterPage } from "@/features/auth/pages/RegisterPage";
 import { DashboardPage } from "@/features/dashboard/pages/DashboardPage";
 import { BoardPage } from "@/features/project/pages/BoardPage";
 import { MilestonesPage } from "@/features/project/pages/MilestonesPage";
+import { CreateProjectPage } from "@/features/project/pages/CreateProjectPage";
 import { ProjectDetailPage } from "@/features/project/pages/ProjectDetailPage";
 import { ProjectsPage } from "@/features/project/pages/ProjectsPage";
 import { ReportsPage } from "@/features/report/pages/ReportsPage";
@@ -12,6 +13,7 @@ import { MembersPage } from "@/features/settings/pages/MembersPage";
 import { SettingsPage } from "@/features/settings/pages/SettingsPage";
 import { MyTasksPage } from "@/features/task/pages/MyTasksPage";
 import { AcceptInvitationPage } from "@/features/workspace/pages/AcceptInvitationPage";
+import { CreateWorkspacePage } from "@/features/workspace/pages/CreateWorkspacePage";
 import { WorkspaceDetailPage } from "@/features/workspace/pages/WorkspaceDetailPage";
 import { WorkspaceListPage } from "@/features/workspace/pages/WorkspaceListPage";
 import { AppShell } from "@/shared/components/layout/AppShell";
@@ -29,9 +31,11 @@ export function AppRouter() {
         <Route element={<AppShell />}>
           <Route index element={<DashboardPage />} />
           <Route path="workspaces" element={<WorkspaceListPage />} />
-          <Route path="workspaces/:id" element={<WorkspaceDetailPage />} />
+          <Route path="workspaces/new" element={<CreateWorkspacePage />} />
+          <Route path="workspaces/:workspaceSlug" element={<WorkspaceDetailPage />} />
+          <Route path="workspaces/:workspaceSlug/projects/new" element={<CreateProjectPage />} />
           <Route
-            path="workspaces/:id/projects/:projectId"
+            path="workspaces/:workspaceSlug/projects/:projectSlug"
             element={<ProjectDetailPage />}
           />
           <Route path="my-tasks" element={<MyTasksPage />} />

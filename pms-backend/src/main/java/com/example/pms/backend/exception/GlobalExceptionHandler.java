@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -23,6 +24,16 @@ public class GlobalExceptionHandler {
                 .body(ApiErrorResponse.builder()
                         .code(code.getCode())
                         .message(ex.getMessage())
+                        .timestamp(Instant.now())
+                        .build());
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiErrorResponse> handleUnreadable(HttpMessageNotReadableException ex) {
+        return ResponseEntity.badRequest()
+                .body(ApiErrorResponse.builder()
+                        .code(ErrorCode.VALIDATION_ERROR.getCode())
+                        .message("Dữ liệu JSON không hợp lệ")
                         .timestamp(Instant.now())
                         .build());
     }

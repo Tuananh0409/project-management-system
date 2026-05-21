@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { Building2, Filter, Search, ShieldCheck, UsersRound } from "lucide-react";
 import { ApiClientError } from "@/shared/api/client";
 import { Button } from "@/shared/components/ui/Button";
@@ -9,7 +10,6 @@ import { PageHeader } from "@/shared/components/layout/PageHeader";
 import { canCreateWorkspace } from "@/shared/utils/workspacePermissions";
 import { workspaceApi } from "../api/workspaceApi";
 import { useAuth } from "@/shared/context/AuthContext";
-import { CreateWorkspaceModal } from "../components/CreateWorkspaceModal";
 import { WorkspaceCard } from "../components/WorkspaceCard";
 import type { Workspace } from "../types";
 
@@ -19,8 +19,8 @@ export function WorkspaceListPage() {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [showCreateModal, setShowCreateModal] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
+  const createHref = "/workspaces/new";
   const [privacyFilter, setPrivacyFilter] = useState<"ALL" | "PRIVATE" | "ORG_WIDE">("ALL");
 
   const load = useCallback(async () => {
@@ -98,12 +98,9 @@ export function WorkspaceListPage() {
         breadcrumbs={[{ label: "Tổng quan", to: "/" }, { label: "Workspace" }]}
         actions={
           canCreate ? (
-            <Button
-              onClick={() => setShowCreateModal(true)}
-              className="rounded-xl px-4 py-2.5 shadow-sm"
-            >
-              + Tạo Workspace
-            </Button>
+            <Link to={createHref}>
+              <Button className="rounded-xl px-4 py-2.5 shadow-sm">+ Tạo phòng ban</Button>
+            </Link>
           ) : undefined
         }
       />
@@ -180,9 +177,9 @@ export function WorkspaceListPage() {
           message="Chưa có workspace nào."
           action={
             canCreate ? (
-              <Button onClick={() => setShowCreateModal(true)}>
-                Tạo workspace đầu tiên
-              </Button>
+              <Link to={createHref}>
+                <Button>Tạo phòng ban đầu tiên</Button>
+              </Link>
             ) : (
               <p className="text-sm text-slate-500">Chỉ admin hệ thống mới tạo được workspace.</p>
             )
@@ -212,12 +209,6 @@ export function WorkspaceListPage() {
         </div>
       )}
 
-      {canCreate && showCreateModal && (
-        <CreateWorkspaceModal
-          onClose={() => setShowCreateModal(false)}
-          onCreated={load}
-        />
-      )}
     </>
   );
 }

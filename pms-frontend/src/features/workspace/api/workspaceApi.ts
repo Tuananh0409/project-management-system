@@ -1,59 +1,60 @@
-import { apiFetch } from "@/shared/api/client";
-import type {
-  CreateWorkspacePayload,
-  InviteMemberPayload,
-  Invitation,
-  Member,
-  UpdateWorkspacePayload,
-  Workspace,
-} from "../types";
-
-export const workspaceApi = {
-  list: () => apiFetch<Workspace[]>("/api/workspaces"),
-
-  get: (id: number) => apiFetch<Workspace>(`/api/workspaces/${id}`),
-
-  create: (payload: CreateWorkspacePayload) =>
-    apiFetch<Workspace>("/api/workspaces", {
-      method: "POST",
-      body: JSON.stringify(payload),
-    }),
-
-  update: (id: number, payload: UpdateWorkspacePayload) =>
-    apiFetch<Workspace>(`/api/workspaces/${id}`, {
-      method: "PATCH",
-      body: JSON.stringify(payload),
-    }),
-
-  delete: (id: number, confirmName: string) =>
-    apiFetch<void>(`/api/workspaces/${id}`, {
-      method: "DELETE",
-      body: JSON.stringify({ confirmName }),
-    }),
-
-  listMembers: (id: number) =>
-    apiFetch<Member[]>(`/api/workspaces/${id}/members`),
-
-  listInvitations: (id: number) =>
-    apiFetch<Invitation[]>(`/api/workspaces/${id}/invitations`),
-
-  invite: (id: number, payload: InviteMemberPayload) =>
-    apiFetch<Invitation>(`/api/workspaces/${id}/invitations`, {
-      method: "POST",
-      body: JSON.stringify(payload),
-    }),
-
-  updateMemberRole: (workspaceId: number, userId: number, roleName: string) =>
-    apiFetch<Member>(`/api/workspaces/${workspaceId}/members/${userId}/role`, {
-      method: "PATCH",
-      body: JSON.stringify({ roleName }),
-    }),
-
-  removeMember: (workspaceId: number, userId: number) =>
-    apiFetch<void>(`/api/workspaces/${workspaceId}/members/${userId}`, {
-      method: "DELETE",
-    }),
-
-  leave: (id: number) =>
-    apiFetch<void>(`/api/workspaces/${id}/leave`, { method: "POST" }),
-};
+import { apiFetch } from "@/shared/api/client";
+import type {
+  CreateWorkspacePayload,
+  InviteMemberPayload,
+  Invitation,
+  Member,
+  UpdateWorkspacePayload,
+  Workspace,
+} from "../types";
+
+function wsBase(slug: string) {
+  return `/api/workspaces/${encodeURIComponent(slug)}`;
+}
+
+export const workspaceApi = {
+  list: () => apiFetch<Workspace[]>("/api/workspaces"),
+
+  get: (slug: string) => apiFetch<Workspace>(wsBase(slug)),
+
+  create: (payload: CreateWorkspacePayload) =>
+    apiFetch<Workspace>("/api/workspaces", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  update: (slug: string, payload: UpdateWorkspacePayload) =>
+    apiFetch<Workspace>(wsBase(slug), {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
+
+  delete: (slug: string, confirmName: string) =>
+    apiFetch<void>(wsBase(slug), {
+      method: "DELETE",
+      body: JSON.stringify({ confirmName }),
+    }),
+
+  listMembers: (slug: string) => apiFetch<Member[]>(`${wsBase(slug)}/members`),
+
+  listInvitations: (slug: string) => apiFetch<Invitation[]>(`${wsBase(slug)}/invitations`),
+
+  invite: (slug: string, payload: InviteMemberPayload) =>
+    apiFetch<Invitation>(`${wsBase(slug)}/invitations`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  updateMemberRole: (slug: string, userId: number, roleName: string) =>
+    apiFetch<Member>(`${wsBase(slug)}/members/${userId}/role`, {
+      method: "PATCH",
+      body: JSON.stringify({ roleName }),
+    }),
+
+  removeMember: (slug: string, userId: number) =>
+    apiFetch<void>(`${wsBase(slug)}/members/${userId}`, {
+      method: "DELETE",
+    }),
+
+  leave: (slug: string) => apiFetch<void>(`${wsBase(slug)}/leave`, { method: "POST" }),
+};

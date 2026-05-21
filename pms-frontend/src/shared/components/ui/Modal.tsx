@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import { type ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 type Props = {
   title: string;
@@ -7,8 +8,13 @@ type Props = {
 };
 
 export function Modal({ title, children, onClose }: Props) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[90] flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+    >
       <button
         type="button"
         aria-label="Đóng"
@@ -17,7 +23,9 @@ export function Modal({ title, children, onClose }: Props) {
       />
       <div className="relative z-10 w-full max-w-lg rounded-2xl bg-white p-6 text-slate-900 shadow-2xl shadow-slate-900/15 ring-1 ring-slate-200/80">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
+          <h2 id="modal-title" className="text-lg font-semibold text-slate-900">
+            {title}
+          </h2>
           <button
             type="button"
             onClick={onClose}
@@ -28,6 +36,7 @@ export function Modal({ title, children, onClose }: Props) {
         </div>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

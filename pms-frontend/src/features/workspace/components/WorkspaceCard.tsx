@@ -1,6 +1,7 @@
 import { Clock3, Globe2, Shield, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/shared/components/ui/Badge";
+import { workspacePath } from "@/shared/routes/paths";
 import type { Workspace } from "../types";
 import { WorkspaceAvatar } from "./WorkspaceAvatar";
 
@@ -12,7 +13,7 @@ export function WorkspaceCard({ workspace }: Props) {
 
   return (
     <Link
-      to={`/workspaces/${workspace.id}`}
+      to={workspacePath(workspace.slug)}
       className="group block overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm ring-1 ring-white transition duration-200 hover:-translate-y-0.5 hover:border-brand-300/70 hover:shadow-lg hover:shadow-slate-900/5"
     >
       <div

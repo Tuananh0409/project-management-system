@@ -2,19 +2,21 @@ import { type FormEvent, useState } from "react";
 import { ApiClientError } from "@/shared/api/client";
 import { Button } from "@/shared/components/ui/Button";
 import { Modal } from "@/shared/components/ui/Modal";
+import { useToast } from "@/shared/context/ToastContext";
 import { workspaceApi } from "../api/workspaceApi";
 
 type Props = {
-  workspaceId: number;
+  workspaceSlug: string;
   onClose: () => void;
   onInvited: () => void;
 };
 
 export function InviteMemberModal({
-  workspaceId,
+  workspaceSlug,
   onClose,
   onInvited,
 }: Props) {
+  const toast = useToast();
   const [email, setEmail] = useState("");
   const [roleName, setRoleName] = useState("Member");
   const [loading, setLoading] = useState(false);
@@ -27,9 +29,10 @@ export function InviteMemberModal({
     setError("");
     setInviteLink("");
     try {
-      const inv = await workspaceApi.invite(workspaceId, { email, roleName });
+      const inv = await workspaceApi.invite(workspaceSlug, { email, roleName });
       const link = `${window.location.origin}/invitations/${inv.token}/accept`;
       setInviteLink(link);
+      toast.success(`Đã gửi lời mời tới ${email}`);
       onInvited();
     } catch (err) {
       setError(

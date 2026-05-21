@@ -5,13 +5,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.example.pms.backend.security.CurrentUserProvider;
+import com.example.pms.backend.auth.AuthTestSupport;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -26,6 +27,9 @@ class WorkspaceApiTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private AuthTestSupport authTestSupport;
+
     @Test
     void createWorkspace_inviteAndAccept() throws Exception {
         String workspaceJson = objectMapper.writeValueAsString(Map.of(
@@ -35,7 +39,7 @@ class WorkspaceApiTest {
                 "slug", "phong-it"));
 
         MvcResult createResult = mockMvc.perform(post("/api/workspaces")
-                        .header(CurrentUserProvider.USER_ID_HEADER, "1")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + authTestSupport.bearerTokenForUserId(1))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(workspaceJson))
                 .andExpect(status().isCreated())
@@ -43,17 +47,17 @@ class WorkspaceApiTest {
                 .andExpect(jsonPath("$.myRole").value("Admin"))
                 .andReturn();
 
-        long workspaceId = objectMapper
+        String workspaceSlug = objectMapper
                 .readTree(createResult.getResponse().getContentAsString())
-                .get("id")
-                .asLong();
+                .get("slug")
+                .asText();
 
         String inviteJson = objectMapper.writeValueAsString(Map.of(
                 "email", "member@ctel.local",
                 "roleName", "Member"));
 
-        MvcResult inviteResult = mockMvc.perform(post("/api/workspaces/{id}/invitations", workspaceId)
-                        .header(CurrentUserProvider.USER_ID_HEADER, "1")
+        MvcResult inviteResult = mockMvc.perform(post("/api/workspaces/{slug}/invitations", workspaceSlug)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + authTestSupport.bearerTokenForUserId(1))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(inviteJson))
                 .andExpect(status().isCreated())
@@ -67,12 +71,12 @@ class WorkspaceApiTest {
                 .asText();
 
         mockMvc.perform(post("/api/invitations/{token}/accept", token)
-                        .header(CurrentUserProvider.USER_ID_HEADER, "2"))
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + authTestSupport.bearerTokenForUserId(2)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.myRole").value("Member"));
 
-        mockMvc.perform(get("/api/workspaces/{id}/members", workspaceId)
-                        .header(CurrentUserProvider.USER_ID_HEADER, "1"))
+        mockMvc.perform(get("/api/workspaces/{slug}/members", workspaceSlug)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + authTestSupport.bearerTokenForUserId(1)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2));
     }

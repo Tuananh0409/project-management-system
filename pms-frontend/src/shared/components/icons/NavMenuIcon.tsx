@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 
-const defaultClass = "h-5 w-5 shrink-0 opacity-90";
+const defaultClass = "h-[18px] w-[18px] shrink-0";
 
 type Props = {
   icon: LucideIcon;

@@ -1,4 +1,23 @@
-# Copy to application-local.properties and adjust for your machine
+# Copy file này thành application-local.properties (cùng thư mục).
+# File application-local.properties KHÔNG được commit — mỗi máy cấu hình riêng.
+#
+# Dùng khi:
+# - Máy đã cài PostgreSQL sẵn, mật khẩu user postgres khác "postgres"
+# - Docker Postgres dùng port khác 5432
+# - Lỗi: FATAL: password authentication failed for user "postgres"
+
+# --- Cách 1 (khuyên dùng): chỉ dùng Docker Postgres của repo ---
+# docker compose up -d   (thư mục gốc repo)
+# Giữ nguyên cấu hình mặc định bên dưới.
+
 spring.datasource.url=jdbc:postgresql://localhost:5432/pms
 spring.datasource.username=postgres
 spring.datasource.password=postgres
+
+# --- Cách 2: máy có Postgres cài sẵn, không dùng Docker ---
+# Tắt Postgres local hoặc đổi port Docker trong docker-compose.yml (vd. 5433:5432),
+# rồi trỏ URL tới instance bạn muốn dùng:
+#
+# spring.datasource.url=jdbc:postgresql://localhost:5432/pms
+# spring.datasource.username=postgres
+# spring.datasource.password=<mat-khau-postgres-tren-may-ban>

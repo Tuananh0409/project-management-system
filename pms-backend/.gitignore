@@ -31,3 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Local overrides (DB password khác từng máy) ###
+src/main/resources/application-local.properties
+
+### Uploaded files (local storage) ###
+uploads/

@@ -1,7 +1,7 @@
 import type { ApiErrorBody } from "./types";
-import { getUserId } from "./session";
+import { clearSession } from "./session";
 
-export { getUserId, getStoredUser, persistSession, clearSession } from "./session";
+export { getUserId, getStoredUser, persistSession, updateStoredUser, clearSession } from "./session";
 
 export class ApiClientError extends Error {
   code: string;
@@ -26,28 +26,37 @@ async function parseError(res: Response): Promise<ApiClientError> {
   return new ApiClientError(res.status, body);
 }
 
+function handleUnauthorized(path: string) {
+  const isAuthRoute = path.startsWith("/api/auth/login") || path.startsWith("/api/auth/register");
+  if (isAuthRoute) return;
+  clearSession();
+  if (typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
+    window.location.assign("/login");
+  }
+}
+
 export type ApiFetchOptions = RequestInit & {
-  /** Không gửi X-User-Id (đăng ký / đăng nhập). */
-  skipUserHeader?: boolean;
+  /** Đăng ký / đăng nhập — không cần cookie phiên cũ. */
+  skipAuth?: boolean;
 };
 
 export async function apiFetch<T>(
   path: string,
   options: ApiFetchOptions = {},
 ): Promise<T> {
-  const { skipUserHeader, ...fetchOptions } = options;
+  const { skipAuth, ...fetchOptions } = options;
   const headers = new Headers(fetchOptions.headers);
-  const userId = getUserId();
-  if (!skipUserHeader && userId) {
-    headers.set("X-User-Id", userId);
-  }
   if (fetchOptions.body && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
 
   let res: Response;
   try {
-    res = await fetch(path, { ...fetchOptions, headers });
+    res = await fetch(path, {
+      ...fetchOptions,
+      headers,
+      credentials: skipAuth ? "same-origin" : "include",
+    });
   } catch {
     throw new ApiClientError(0, {
       code: "NETWORK_ERROR",
@@ -56,8 +65,43 @@ export async function apiFetch<T>(
     });
   }
 
+  if (res.status === 401) {
+    handleUnauthorized(path);
+  }
+
   if (res.status === 204) {
     return undefined as T;
+  }
+
+  if (!res.ok) {
+    throw await parseError(res);
+  }
+
+  return res.json() as Promise<T>;
+}
+
+/** Upload multipart/form-data (không set Content-Type — browser tự thêm boundary). */
+export async function apiUpload<T>(path: string, file: File, fieldName = "file"): Promise<T> {
+  const form = new FormData();
+  form.append(fieldName, file);
+
+  let res: Response;
+  try {
+    res = await fetch(path, {
+      method: "POST",
+      body: form,
+      credentials: "include",
+    });
+  } catch {
+    throw new ApiClientError(0, {
+      code: "NETWORK_ERROR",
+      message:
+        "Không kết nối được backend. Hãy chạy Docker (Postgres) và backend trên cổng 8080.",
+    });
+  }
+
+  if (res.status === 401) {
+    handleUnauthorized(path);
   }
 
   if (!res.ok) {

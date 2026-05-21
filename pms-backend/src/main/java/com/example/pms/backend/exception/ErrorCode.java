@@ -23,8 +23,20 @@ public enum ErrorCode {
     WEAK_PASSWORD("ERR_US_02", "Mật khẩu không đủ độ mạnh", HttpStatus.BAD_REQUEST),
     INVALID_CREDENTIALS("ERR_US_03", "Sai thông tin đăng nhập", HttpStatus.UNAUTHORIZED),
     ACCOUNT_LOCKED("ERR_US_04", "Tài khoản đã bị khóa", HttpStatus.FORBIDDEN),
+    UNAUTHORIZED("ERR_US_05", "Bạn cần đăng nhập để thực hiện thao tác này", HttpStatus.UNAUTHORIZED),
+    TOKEN_INVALID("ERR_US_06", "Phiên đăng nhập không hợp lệ hoặc đã hết hạn", HttpStatus.UNAUTHORIZED),
+    ACCESS_DENIED("ERR_US_07", "Bạn không có quyền truy cập tài nguyên này", HttpStatus.FORBIDDEN),
     PASSWORD_MISMATCH("ERR_US_09", "Mật khẩu xác nhận không khớp", HttpStatus.BAD_REQUEST),
     USER_NOT_FOUND("ERR_US_11", "Người dùng không tồn tại", HttpStatus.NOT_FOUND),
+    PROJECT_NAME_EXISTS("ERR_PJ_01", "Tên dự án đã tồn tại trong Workspace", HttpStatus.CONFLICT),
+    PROJECT_DATE_RANGE_INVALID("ERR_PJ_02", "Ngày kết thúc không được trước ngày bắt đầu", HttpStatus.BAD_REQUEST),
+    PROJECT_NOT_FOUND("ERR_PJ_03", "Dự án không tồn tại", HttpStatus.NOT_FOUND),
+    PROJECT_FORBIDDEN("ERR_PJ_04", "Bạn không có quyền thực hiện thao tác trên dự án này", HttpStatus.FORBIDDEN),
+    PROJECT_LAST_PM("ERR_PJ_07", "Không thể xóa Project Manager duy nhất", HttpStatus.CONFLICT),
+    ATTACHMENT_NOT_FOUND("ERR_PJ_08", "Tệp đính kèm không tồn tại", HttpStatus.NOT_FOUND),
+    ATTACHMENT_TOO_LARGE("ERR_PJ_09", "File vượt quá dung lượng cho phép (tối đa 20MB)", HttpStatus.BAD_REQUEST),
+    ATTACHMENT_TYPE_NOT_ALLOWED("ERR_PJ_10", "Định dạng file không được phép", HttpStatus.BAD_REQUEST),
+    ATTACHMENT_FORBIDDEN("ERR_PJ_11", "Bạn không có quyền thao tác tệp đính kèm này", HttpStatus.FORBIDDEN),
     VALIDATION_ERROR("ERR_VALIDATION", "Dữ liệu không hợp lệ", HttpStatus.BAD_REQUEST);
 
     private final String code;

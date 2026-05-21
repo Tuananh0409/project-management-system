@@ -8,10 +8,13 @@ import { invitationApi } from "@/features/workspace/api/invitationApi";
 import { ApiClientError } from "@/shared/api/client";
 import { Button } from "@/shared/components/ui/Button";
 import { useAuth } from "@/shared/context/AuthContext";
+import { useToast } from "@/shared/context/ToastContext";
 import { notifyWorkspacesChanged } from "@/shared/events/appEvents";
+import { workspacePath } from "@/shared/routes/paths";
 
 export function AppTopBar() {
   const { user, logout } = useAuth();
+  const toast = useToast();
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loadingNotifications, setLoadingNotifications] = useState(true);
@@ -21,8 +24,9 @@ export function AppTopBar() {
   );
   const [submittingAction, setSubmittingAction] = useState(false);
 
-  function handleLogout() {
-    logout();
+  async function handleLogout() {
+    await logout();
+    toast.success("Đã đăng xuất");
     navigate("/login", { replace: true });
   }
 
@@ -45,9 +49,10 @@ export function AppTopBar() {
       await loadNotifications();
       setSelectedNotification(null);
       notifyWorkspacesChanged({ workspaceId: ws.id });
-      navigate(`/workspaces/${ws.id}`);
+      toast.success(`Đã tham gia workspace "${ws.name}"`);
+      navigate(workspacePath(ws.slug));
     } catch (err) {
-      window.alert(
+      toast.error(
         err instanceof ApiClientError ? err.message : "Không thể chấp nhận lời mời",
       );
     } finally {
@@ -61,8 +66,9 @@ export function AppTopBar() {
       await invitationApi.decline(token);
       await loadNotifications();
       setSelectedNotification(null);
+      toast.success("Đã từ chối lời mời");
     } catch (err) {
-      window.alert(
+      toast.error(
         err instanceof ApiClientError ? err.message : "Không thể từ chối lời mời",
       );
     } finally {

@@ -2,10 +2,13 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ApiClientError } from "@/shared/api/client";
 import { Button } from "@/shared/components/ui/Button";
+import { useToast } from "@/shared/context/ToastContext";
 import { notifyWorkspacesChanged } from "@/shared/events/appEvents";
+import { workspacePath } from "@/shared/routes/paths";
 import { invitationApi } from "../api/invitationApi";
 
 export function AcceptInvitationPage() {
+  const toast = useToast();
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const [status, setStatus] = useState<"loading" | "ok" | "error">("loading");
@@ -17,9 +20,11 @@ export function AcceptInvitationPage() {
       .accept(token)
       .then((ws) => {
         setStatus("ok");
-        setMessage(`Đã tham gia workspace "${ws.name}"`);
+        const msg = `Đã tham gia workspace "${ws.name}"`;
+        setMessage(msg);
+        toast.success(msg);
         notifyWorkspacesChanged({ workspaceId: ws.id });
-        setTimeout(() => navigate(`/workspaces/${ws.id}`), 1500);
+        setTimeout(() => navigate(workspacePath(ws.slug)), 1500);
       })
       .catch((err) => {
         setStatus("error");
@@ -27,7 +32,7 @@ export function AcceptInvitationPage() {
           err instanceof ApiClientError ? err.message : "Lỗi chấp nhận lời mời",
         );
       });
-  }, [token, navigate]);
+  }, [token, navigate, toast]);
 
   return (
     <div className="mx-auto max-w-md rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm">

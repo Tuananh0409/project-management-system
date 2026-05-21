@@ -9,6 +9,7 @@ import { useAuth } from "@/shared/context/AuthContext";
 import { canCreateWorkspace } from "@/shared/utils/workspacePermissions";
 import { workspaceApi } from "@/features/workspace/api/workspaceApi";
 import type { Workspace } from "@/features/workspace/types";
+import { workspacePath } from "@/shared/routes/paths";
 
 export function DashboardPage() {
   const { user } = useAuth();
@@ -95,7 +96,7 @@ export function DashboardPage() {
             {workspaces.slice(0, 5).map((w) => (
               <li key={w.id}>
                 <Link
-                  to={`/workspaces/${w.id}`}
+                  to={workspacePath(w.slug)}
                   className="flex items-center justify-between gap-4 py-3 hover:bg-slate-50"
                 >
                   <span className="font-medium text-slate-900">{w.name}</span>

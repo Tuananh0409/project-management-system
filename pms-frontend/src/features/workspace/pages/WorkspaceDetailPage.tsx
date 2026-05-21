@@ -21,11 +21,13 @@ import { MemberTable } from "../components/MemberTable";
 import { PendingInvitationsList } from "../components/PendingInvitationsList";
 import { WorkspaceAvatar } from "../components/WorkspaceAvatar";
 import { WorkspaceDangerZone } from "../components/WorkspaceDangerZone";
+import { WorkspaceProjectsSection } from "../components/WorkspaceProjectsSection";
+import { useToast } from "@/shared/context/ToastContext";
 import type { Invitation, Member, Workspace } from "../types";
 
 export function WorkspaceDetailPage() {
-  const { id } = useParams<{ id: string }>();
-  const workspaceId = Number(id);
+  const toast = useToast();
+  const { workspaceSlug } = useParams<{ workspaceSlug: string }>();
   const navigate = useNavigate();
 
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
@@ -36,16 +38,19 @@ export function WorkspaceDetailPage() {
   const [showInvite, setShowInvite] = useState(false);
 
   const isAdmin = workspace?.myRole?.toLowerCase() === "admin";
+  const canCreateProject =
+    workspace?.myRole?.toLowerCase() === "admin" ||
+    workspace?.myRole?.toLowerCase() === "member";
 
   const load = useCallback(async () => {
-    if (!workspaceId) return;
+    if (!workspaceSlug) return;
     setLoading(true);
     setError("");
     try {
       const [ws, mem, inv] = await Promise.all([
-        workspaceApi.get(workspaceId),
-        workspaceApi.listMembers(workspaceId),
-        workspaceApi.listInvitations(workspaceId).catch(() => [] as Invitation[]),
+        workspaceApi.get(workspaceSlug),
+        workspaceApi.listMembers(workspaceSlug),
+        workspaceApi.listInvitations(workspaceSlug).catch(() => [] as Invitation[]),
       ]);
       setWorkspace(ws);
       setMembers(mem);
@@ -57,7 +62,7 @@ export function WorkspaceDetailPage() {
     } finally {
       setLoading(false);
     }
-  }, [workspaceId]);
+  }, [workspaceSlug]);
 
   useEffect(() => {
     load();
@@ -66,7 +71,8 @@ export function WorkspaceDetailPage() {
   async function handleDelete(confirmName: string) {
     if (!workspace) return;
     try {
-      await workspaceApi.delete(workspace.id, confirmName);
+      await workspaceApi.delete(workspace.slug, confirmName);
+      toast.success(`Đã xóa workspace "${workspace.name}"`);
       navigate("/workspaces");
     } catch (err) {
       setError(err instanceof ApiClientError ? err.message : "Không xóa được");
@@ -75,7 +81,8 @@ export function WorkspaceDetailPage() {
 
   async function handleRoleChange(userId: number, roleName: string) {
     try {
-      await workspaceApi.updateMemberRole(workspaceId, userId, roleName);
+      await workspaceApi.updateMemberRole(workspaceSlug!, userId, roleName);
+      toast.success("Đã cập nhật vai trò thành viên");
       load();
     } catch (err) {
       setError(err instanceof ApiClientError ? err.message : "Không đổi được role");
@@ -85,7 +92,8 @@ export function WorkspaceDetailPage() {
   async function handleRemoveMember(userId: number) {
     if (!confirm("Xóa thành viên khỏi workspace?")) return;
     try {
-      await workspaceApi.removeMember(workspaceId, userId);
+      await workspaceApi.removeMember(workspaceSlug!, userId);
+      toast.success("Đã xóa thành viên khỏi workspace");
       load();
     } catch (err) {
       setError(err instanceof ApiClientError ? err.message : "Không xóa được");
@@ -252,6 +260,12 @@ export function WorkspaceDetailPage() {
         </p>
       </div>
 
+      <WorkspaceProjectsSection
+        workspaceSlug={workspace.slug}
+        workspaceId={workspace.id}
+        canCreate={!!canCreateProject}
+      />
+
       <section className="mb-8">
         <div className="mb-4 flex items-center gap-2">
           <Users className="h-5 w-5 text-slate-600" strokeWidth={2} />
@@ -273,7 +287,7 @@ export function WorkspaceDetailPage() {
 
       {showInvite && (
         <InviteMemberModal
-          workspaceId={workspaceId}
+          workspaceSlug={workspace.slug}
           onClose={() => setShowInvite(false)}
           onInvited={load}
         />

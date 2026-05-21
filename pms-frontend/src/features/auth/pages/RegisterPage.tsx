@@ -4,11 +4,13 @@ import { ApiClientError } from "@/shared/api/client";
 import { Button } from "@/shared/components/ui/Button";
 import { ErrorAlert } from "@/shared/components/feedback/ErrorAlert";
 import { useAuth } from "@/shared/context/AuthContext";
+import { useToast } from "@/shared/context/ToastContext";
 import { authApi } from "../api/authApi";
 
 export function RegisterPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const toast = useToast();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,6 +30,7 @@ export function RegisterPage() {
         confirmPassword,
       });
       login(user);
+      toast.success("Đăng ký tài khoản thành công");
       navigate("/", { replace: true });
     } catch (err) {
       setError(err instanceof ApiClientError ? err.message : "Đăng ký thất bại");

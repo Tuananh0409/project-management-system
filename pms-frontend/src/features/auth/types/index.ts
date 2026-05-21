@@ -16,3 +16,13 @@ export interface LoginPayload {
   email: string;
   password: string;
 }
+
+export interface ChangePasswordPayload {
+  currentPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
+}
+
+export interface UpdateProfilePayload {
+  username: string;
+}

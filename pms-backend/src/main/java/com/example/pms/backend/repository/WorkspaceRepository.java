@@ -19,6 +19,8 @@ public interface WorkspaceRepository extends JpaRepository<Workspace, Long> {
 
     Optional<Workspace> findByIdAndDeletedFalse(Long id);
 
+    Optional<Workspace> findBySlugIgnoreCaseAndDeletedFalse(String slug);
+
     @Query("""
             SELECT w FROM Workspace w
             LEFT JOIN FETCH w.owner

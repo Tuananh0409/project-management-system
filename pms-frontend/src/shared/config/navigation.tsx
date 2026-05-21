@@ -85,7 +85,7 @@ export const MAIN_NAV: NavSection[] = [
         label: "Cài đặt",
         path: "/settings",
         icon: <NavMenuIcon icon={Settings} />,
-        badge: "Sắp có",
+        live: true,
       },
     ],
   },

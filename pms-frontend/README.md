@@ -19,6 +19,8 @@ Mở http://localhost:5173
 
 - Đăng ký / đăng nhập tại `/login`, `/register`
 - Dev seed: `admin@ctel.local` / `Admin@123` (sau Flyway V4)
+- JWT trong cookie **httpOnly** `pms_access_token`; request dùng `credentials: include`
+- Cài đặt tài khoản: `/settings` (hồ sơ, đổi mật khẩu)
 
 ## Tính năng
 

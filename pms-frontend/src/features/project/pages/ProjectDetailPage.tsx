@@ -1,99 +1,226 @@
-import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { projectApi } from "../api/projectApi";
+import { type FormEvent, useCallback, useEffect, useState } from "react";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { workspaceApi } from "@/features/workspace/api/workspaceApi";
-import type { ProjectSummary } from "../types";
+import type { Member } from "@/features/workspace/types";
 import { ApiClientError } from "@/shared/api/client";
-import { ComingSoonPage } from "@/shared/components/feedback/ComingSoonPage";
 import { ErrorAlert } from "@/shared/components/feedback/ErrorAlert";
 import { LoadingState } from "@/shared/components/feedback/LoadingState";
-import { PageHeader } from "@/shared/components/layout/PageHeader";
+import { useToast } from "@/shared/context/ToastContext";
+import { notifyProjectsChanged } from "@/shared/events/appEvents";
+import { PROJECT_COLOR_PRESETS } from "@/shared/config/project-options";
+import { workspacePath } from "@/shared/routes/paths";
+import { DEFAULT_PROJECT_TAB, parseProjectTab } from "../config/projectTabs";
+import { ProjectShellHeader } from "../components/project-shell/ProjectShellHeader";
+import { ProjectTabNav } from "../components/project-shell/ProjectTabNav";
+import { ProjectViewToolbar } from "../components/project-shell/ProjectViewToolbar";
+import { ProjectBacklogTab } from "../components/project-views/ProjectBacklogTab";
+import { ProjectBoardTab } from "../components/project-views/ProjectBoardTab";
+import { ProjectSettingsPanel } from "../components/project-views/ProjectSettingsPanel";
+import { ProjectSummaryTab } from "../components/project-views/ProjectSummaryTab";
+import { projectApi } from "../api/projectApi";
+import type { ProjectDetail, ProjectMember } from "../types";
+
+function toDateInput(iso: string | null) {
+  if (!iso) return "";
+  return iso.slice(0, 10);
+}
+
+function canManageProject(role: string | null | undefined) {
+  const r = role?.toLowerCase();
+  return r === "pm" || r === "lead" || r === "admin";
+}
 
 export function ProjectDetailPage() {
-  const { id: workspaceIdParam, projectId: projectIdParam } = useParams();
-  const workspaceId = Number(workspaceIdParam);
-  const projectId = Number(projectIdParam);
+  const { workspaceSlug, projectSlug } = useParams<{
+    workspaceSlug: string;
+    projectSlug: string;
+  }>();
+  const navigate = useNavigate();
+  const toast = useToast();
+  const [searchParams] = useSearchParams();
+  const activeTab = parseProjectTab(searchParams.get("tab") ?? DEFAULT_PROJECT_TAB);
 
-  const [project, setProject] = useState<ProjectSummary | null>(null);
+  const [project, setProject] = useState<ProjectDetail | null>(null);
+  const [members, setMembers] = useState<ProjectMember[]>([]);
+  const [workspaceMembers, setWorkspaceMembers] = useState<Member[]>([]);
   const [workspaceName, setWorkspaceName] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+
+  const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editStatus, setEditStatus] = useState("Active");
+  const [editStart, setEditStart] = useState("");
+  const [editEnd, setEditEnd] = useState("");
+  const [editColor, setEditColor] = useState<string>(PROJECT_COLOR_PRESETS[0]);
+  const [editPrivacy, setEditPrivacy] = useState("PRIVATE");
+  const [editLeadUserId, setEditLeadUserId] = useState("");
+
+  const load = useCallback(async () => {
+    if (!workspaceSlug || !projectSlug) return;
+    setLoading(true);
+    setError("");
+    try {
+      const [ws, proj, mem] = await Promise.all([
+        workspaceApi.get(workspaceSlug),
+        projectApi.get(workspaceSlug, projectSlug),
+        projectApi.listMembers(workspaceSlug, projectSlug),
+      ]);
+      setWorkspaceName(ws.name);
+      setProject(proj);
+      setMembers(mem);
+      setEditName(proj.name);
+      setEditDescription(proj.description ?? "");
+      setEditStatus(proj.statusName ?? "Active");
+      setEditStart(toDateInput(proj.startDate));
+      setEditEnd(toDateInput(proj.endDate));
+      setEditColor(proj.colorCode ?? PROJECT_COLOR_PRESETS[0]);
+      setEditPrivacy(proj.privacyMode ?? "PRIVATE");
+      setEditLeadUserId(
+        proj.projectLeadUserId != null ? String(proj.projectLeadUserId) : "",
+      );
+
+      if (canManageProject(proj.myRole)) {
+        const wsMem = await workspaceApi.listMembers(workspaceSlug);
+        setWorkspaceMembers(wsMem);
+      }
+    } catch (err) {
+      setError(err instanceof ApiClientError ? err.message : "Không tải được dự án");
+    } finally {
+      setLoading(false);
+    }
+  }, [workspaceSlug, projectSlug]);
 
   useEffect(() => {
-    if (!workspaceId || !projectId) return;
-
-    let cancelled = false;
-
-    async function load() {
-      setLoading(true);
-      setError("");
-      try {
-        const [workspace, projects] = await Promise.all([
-          workspaceApi.get(workspaceId),
-          projectApi.listByWorkspace(workspaceId),
-        ]);
-        if (cancelled) return;
-        setWorkspaceName(workspace.name);
-        const found = projects.find((p) => p.id === projectId) ?? null;
-        setProject(found);
-        if (!found) {
-          setError("Không tìm thấy dự án trong phòng ban này.");
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setError(
-            err instanceof ApiClientError ? err.message : "Không tải được dự án",
-          );
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
     load();
-    return () => {
-      cancelled = true;
-    };
-  }, [workspaceId, projectId]);
+  }, [load]);
+
+  async function handleSaveSettings(e: FormEvent) {
+    e.preventDefault();
+    if (!project || !workspaceSlug || !projectSlug) return;
+    setSaving(true);
+    try {
+      const updated = await projectApi.update(workspaceSlug, projectSlug, {
+        name: editName,
+        description: editDescription,
+        statusName: editStatus,
+        startDate: editStart || undefined,
+        endDate: editEnd || undefined,
+        colorCode: editColor,
+        privacyMode: editPrivacy,
+        projectLeadUserId: editLeadUserId ? Number(editLeadUserId) : undefined,
+      });
+      setProject(updated);
+      setShowSettings(false);
+      toast.success("Đã cập nhật dự án");
+      notifyProjectsChanged({ workspaceId: project.workspaceId });
+    } catch (err) {
+      setError(err instanceof ApiClientError ? err.message : "Không cập nhật được");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!project || !workspaceSlug || !projectSlug) return;
+    if (!confirm(`Xóa dự án "${project.name}"?`)) return;
+    try {
+      await projectApi.delete(workspaceSlug, projectSlug);
+      toast.success("Đã xóa dự án");
+      notifyProjectsChanged({ workspaceId: project.workspaceId });
+      navigate(workspacePath(workspaceSlug));
+    } catch (err) {
+      setError(err instanceof ApiClientError ? err.message : "Không xóa được dự án");
+    }
+  }
 
   if (loading) return <LoadingState />;
 
-  if (error) {
+  if (error && !project) {
     return (
-      <>
-        <PageHeader
-          title="Dự án"
-          breadcrumbs={[
-            { label: "Tổng quan", to: "/" },
-            { label: "Phòng ban", to: `/workspaces/${workspaceId}` },
-          ]}
-        />
+      <div className="p-6">
         <ErrorAlert message={error} />
-        <Link to={`/workspaces/${workspaceId}`} className="mt-4 inline-block text-sm text-brand-600">
-          ← Quay lại phòng ban
-        </Link>
-      </>
+        {workspaceSlug && (
+          <Link
+            to={workspacePath(workspaceSlug)}
+            className="mt-4 inline-block text-sm text-brand-600"
+          >
+            ← Quay lại phòng ban
+          </Link>
+        )}
+      </div>
     );
   }
 
-  if (!project) return null;
+  if (!project || !workspaceSlug || !projectSlug) return null;
+
+  const manage = canManageProject(project.myRole);
+  const isWsAdmin = project.myRole?.toLowerCase() === "admin";
+  const isProjectMember = project.myRole != null || isWsAdmin;
+  const showWorkToolbar = activeTab === "backlog" || activeTab === "board";
 
   return (
-    <>
-      <PageHeader
-        title={project.name}
-        description={`${project.code} · ${workspaceName}`}
-        breadcrumbs={[
-          { label: "Tổng quan", to: "/" },
-          { label: workspaceName, to: `/workspaces/${workspaceId}` },
-          { label: project.name },
-        ]}
+    <div className="flex min-h-[calc(100vh-3.5rem)] flex-col bg-white">
+      <ProjectShellHeader
+        workspaceName={workspaceName}
+        workspaceSlug={workspaceSlug}
+        project={project}
+        memberCount={members.length}
+        canManage={manage}
+        onOpenSettings={() => setShowSettings(true)}
       />
-      <ComingSoonPage
-        title={project.name}
-        description="Kanban, task và milestone sẽ hiển thị tại đây."
-        moduleName="Project (S2)"
-      />
-    </>
+      <ProjectTabNav activeTab={activeTab} />
+
+      {error && (
+        <div className="px-6 pt-3">
+          <ErrorAlert message={error} />
+        </div>
+      )}
+
+      {showWorkToolbar && <ProjectViewToolbar members={members} />}
+
+      <div className="flex flex-1 flex-col">
+        {activeTab === "summary" && (
+          <ProjectSummaryTab
+            project={project}
+            workspaceSlug={workspaceSlug}
+            projectSlug={projectSlug}
+            members={members}
+            canUpload={isProjectMember}
+          />
+        )}
+        {activeTab === "board" && <ProjectBoardTab />}
+        {activeTab === "backlog" && <ProjectBacklogTab project={project} />}
+      </div>
+
+      {showSettings && manage && (
+        <ProjectSettingsPanel
+          editName={editName}
+          editDescription={editDescription}
+          editStatus={editStatus}
+          editStart={editStart}
+          editEnd={editEnd}
+          editColor={editColor}
+          editPrivacy={editPrivacy}
+          editLeadUserId={editLeadUserId}
+          workspaceMembers={workspaceMembers}
+          saving={saving}
+          isWsAdmin={isWsAdmin}
+          onChangeName={setEditName}
+          onChangeDescription={setEditDescription}
+          onChangeStatus={setEditStatus}
+          onChangeStart={setEditStart}
+          onChangeEnd={setEditEnd}
+          onChangeColor={setEditColor}
+          onChangePrivacy={setEditPrivacy}
+          onChangeLead={setEditLeadUserId}
+          onClose={() => setShowSettings(false)}
+          onSubmit={handleSaveSettings}
+          onDelete={handleDelete}
+        />
+      )}
+    </div>
   );
 }

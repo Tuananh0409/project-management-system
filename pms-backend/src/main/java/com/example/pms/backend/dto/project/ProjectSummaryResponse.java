@@ -12,5 +12,7 @@ public class ProjectSummaryResponse {
     String code;
     String slug;
     String colorCode;
+    String statusName;
+    String myRole;
     Long workspaceId;
 }
